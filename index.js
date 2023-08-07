@@ -22,5 +22,5 @@ app.use("/api/users", userRouter);
 
 // Listening to backend server
 app.listen(3000, () => {
-  console.log("Server is listen on port 3000");
+  console.log("Server listening on port 3000");
 });
