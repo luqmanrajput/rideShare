@@ -1,6 +1,10 @@
 // Imports
 const User = require("../models/User");
-const { signupSchema, loginSchema } = require("../validations/userValidations");
+const {
+  signupSchema,
+  loginSchema,
+  updateSchema,
+} = require("../validations/userValidations");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -105,4 +109,16 @@ const profile = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, profile };
+const update = async (req, res) => {
+  try {
+    const { error } = await updateSchema.validateAsync(req.body);
+  } catch (error) {
+    if (error.isJoi === true) {
+      return res.status(422).json({ error: error.details[0].message });
+    } else {
+      return res.status(500).send("Internal server error occured");
+    }
+  }
+};
+
+module.exports = { signup, login, profile, update };
