@@ -3,6 +3,7 @@ const connectToMongo = require("./db");
 const express = require("express");
 const cors = require("cors");
 const userRouter = require("./routes/users");
+const rideRouter = require("./routes/rides");
 
 // Connecting to MongoDB
 connectToMongo();
@@ -19,6 +20,7 @@ app.use(cors());
 
 // Available routes for requests
 app.use("/api/users", userRouter);
+app.use("/api/rides", rideRouter);
 
 // Listening to backend server
 app.listen(3000, () => {
