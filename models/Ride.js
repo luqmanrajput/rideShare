@@ -18,6 +18,11 @@ const RideSchema = new Schema({
   rideStatus: {
     type: String,
   },
+  ridedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "user",
+    default: null,
+  },
 });
 
 module.exports = mongoose.model("ride", RideSchema);

@@ -39,18 +39,10 @@ const signup = async (req, res) => {
       password: secPass,
       role,
     });
-
-    const authID = {
-      user: {
-        id: user.id,
-      },
-    };
     success = true;
-    const authToken = jwt.sign(authID, JWT_SECRET);
     return res.json({
       success,
       user,
-      authToken,
       message: "User created successfully!",
     });
   } catch (error) {
@@ -66,12 +58,11 @@ const signup = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const tokenID = req.user.id;
     let success = false;
     // Validating Input
     await loginSchema.validateAsync(req.body);
     // Checking for user in database
-    const user = await User.findById({ _id: tokenID });
+    const user = await User.findOne({ email });
     // If user is found
     if (!user) {
       return res.status(400).json({ success, message: "Invalid email!" });
@@ -82,19 +73,20 @@ const login = async (req, res) => {
       return res.status(400).json({ success, message: "Invalid credentials" });
     }
     // If pass matches generate authToken
-    const authID = {
+    const authData = {
       user: {
         id: user.id,
+        role: user.role,
       },
     };
     success = true;
-    const authToken = await jwt.sign(authID, JWT_SECRET);
+    const authToken = await jwt.sign(authData, JWT_SECRET);
     return res.status(200).json({ success, authToken });
   } catch (error) {
     if (error.isJoi === true) {
       return res.status(422).json({ error: error.details[0].message });
     } else {
-      return res.status(500).send("Internal server error occured");
+      return res.status(500).send("Internal server error occured in login");
     }
   }
 };
@@ -138,10 +130,8 @@ const update = async (req, res) => {
       { $set: newUser },
       { new: true }
     );
-    console.log("updateUser: ", updatedUser);
     if (updatedUser) {
       success = true;
-      console.log("success", success);
       return res.status(200).json({ success, updatedUser });
     } else {
       return res.status(400).json({ success, message: "User doesnt exists." });

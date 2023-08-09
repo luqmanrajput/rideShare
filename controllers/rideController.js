@@ -6,18 +6,23 @@ const request = async (req, res) => {
   try {
     let success = false;
     const { startLocation, endLocation } = req.body;
-    console.log(startLocation, endLocation);
     const tokenID = req.user.id;
-    console.log("token Id:", tokenID);
+    const tokenRole = req.user.role;
+    if (tokenRole === "driver") {
+      return res
+        .status(400)
+        .json({ message: "Login as user to request a ride" });
+    }
     // Checking and handling the validation errors
     await rideRequestSchema.validateAsync(req.body);
 
     // Checking ride request has already been made
-    const rideCheck = await Ride.find({
+    const rideCheck = await Ride.findOne({
       userId: tokenID,
-      rideStatus: "reserved" || "enroute",
+      rideStatus: "reserved",
     });
-    console.log("rideCheck: ", rideCheck);
+    console.log("fdsfdsfsdf", rideCheck);
+    console.log(!rideCheck === 0);
     if (rideCheck) {
       return res
         .status(400)
@@ -35,7 +40,7 @@ const request = async (req, res) => {
         longitude: endLocation.longitude,
         latitude: endLocation.latitude,
       },
-      rideStatus: "reserved",
+      rideStatus: "available",
     });
     console.log(ride);
     success = true;
@@ -56,7 +61,12 @@ const history = async (req, res) => {
   try {
     let success = false;
     const tokenID = req.user.id;
-    console.log("in history controller, with token:", tokenID);
+    const tokenRole = req.user.role;
+    if (tokenRole === "driver") {
+      return res
+        .status(400)
+        .json({ message: "Login as user to view ride history" });
+    }
 
     // fetching completed rides in the past
     const rides = await Ride.find({ userId: tokenID, rideStatus: "completed" });
@@ -81,4 +91,24 @@ const history = async (req, res) => {
   }
 };
 
-module.exports = { request, history };
+// Available Rides
+const available = async (req, res) => {
+  try {
+    const tokenRole = req.user.role;
+    console.log("token role for available api:", tokenRole);
+    if (tokenRole === "user") {
+      return res
+        .status(400)
+        .json({ message: "Login as driver to view available rides" });
+    }
+    const rides = await Ride.find({ rideStatus: "available" });
+    if (!rides) {
+      return res.status(400).json({ message: "No Rides available to accept" });
+    }
+    return res.status(200).json({ rides });
+  } catch (error) {
+    return res.status(400).json({ error });
+  }
+};
+
+module.exports = { request, history, available };
