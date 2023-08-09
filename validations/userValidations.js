@@ -14,4 +14,14 @@ const updateSchema = new joi.object({
   email: joi.string().email().required(),
 });
 
-module.exports = { signupSchema, loginSchema, updateSchema };
+const changePasswordSchema = joi.object({
+  current_password: joi.string().min(4).required(),
+  new_password: joi.string().min(4).required(),
+});
+
+module.exports = {
+  signupSchema,
+  loginSchema,
+  updateSchema,
+  changePasswordSchema,
+};

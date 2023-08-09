@@ -5,6 +5,7 @@ const {
   login,
   profile,
   update,
+  changePassword,
 } = require("../controllers/userController");
 const authUser = require("../middlewares/authUser");
 const router = express.Router();
@@ -20,5 +21,8 @@ router.get("/profile", authUser, profile);
 
 // Auth Route 4: Showing user profile - PATCH ('/api/users/profile')
 router.patch("/profile", authUser, update);
+
+// Auth Route 4: Showing user profile - PATCH ('/api/users/profile')
+router.post("/change-password", authUser, changePassword);
 
 module.exports = router;
