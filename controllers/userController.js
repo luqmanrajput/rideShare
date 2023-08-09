@@ -16,13 +16,13 @@ const JWT_SECRET = "mySecretString";
 const signup = async (req, res) => {
   try {
     // Destructuring request data
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
     let success = false;
     // Checking and handling the validation errors
     await signupSchema.validateAsync(req.body);
 
     // Checking if user already exists:
-    let dbUser = await User.findOne({ email });
+    let dbUser = await User.findOne({ email, role });
     console.log(dbUser);
     // If user already exists:
     if (dbUser) {
@@ -37,6 +37,7 @@ const signup = async (req, res) => {
       name,
       email,
       password: secPass,
+      role,
     });
 
     const authID = {
@@ -65,11 +66,12 @@ const signup = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    const tokenID = req.user.id;
     let success = false;
     // Validating Input
     await loginSchema.validateAsync(req.body);
     // Checking for user in database
-    const user = await User.findOne({ email });
+    const user = await User.findById({ _id: tokenID });
     // If user is found
     if (!user) {
       return res.status(400).json({ success, message: "Invalid email!" });
