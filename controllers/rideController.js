@@ -15,7 +15,7 @@ const request = async (req, res) => {
     // Checking ride request has already been made
     const rideCheck = await Ride.find({
       userId: tokenID,
-      rideStatus: "reserved",
+      rideStatus: "reserved" || "enroute",
     });
     console.log("rideCheck: ", rideCheck);
     if (rideCheck) {
@@ -51,4 +51,34 @@ const request = async (req, res) => {
   }
 };
 
-module.exports = { request };
+// View Ride history
+const history = async (req, res) => {
+  try {
+    let success = false;
+    const tokenID = req.user.id;
+    console.log("in history controller, with token:", tokenID);
+
+    // fetching completed rides in the past
+    const rides = await Ride.find({ userId: tokenID, rideStatus: "completed" });
+    if (rides.length === 0) {
+      return res
+        .status(400)
+        .json({ success, message: "No previous rides record found" });
+    }
+    console.log(rides);
+    success = true;
+    return res
+      .status(400)
+      .json({ success, message: "Rides record found", rides });
+  } catch (error) {
+    if (error.isJoi === true) {
+      return res.status(422).json({ error: error.details[0].message });
+    } else {
+      return res
+        .status(500)
+        .send("Internal server error occured in viewing ride history");
+    }
+  }
+};
+
+module.exports = { request, history };

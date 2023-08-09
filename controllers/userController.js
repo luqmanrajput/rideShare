@@ -14,10 +14,10 @@ const JWT_SECRET = "mySecretString";
 
 // Signup
 const signup = async (req, res) => {
-  // Destructuring request data
-  const { name, email, password } = req.body;
-  let success = false;
   try {
+    // Destructuring request data
+    const { name, email, password } = req.body;
+    let success = false;
     // Checking and handling the validation errors
     await signupSchema.validateAsync(req.body);
 
@@ -63,10 +63,9 @@ const signup = async (req, res) => {
 
 // Login
 const login = async (req, res) => {
-  const { email, password } = req.body;
-  let success = false;
-
   try {
+    const { email, password } = req.body;
+    let success = false;
     // Validating Input
     await loginSchema.validateAsync(req.body);
     // Checking for user in database
@@ -100,8 +99,8 @@ const login = async (req, res) => {
 
 // Profile
 const profile = async (req, res) => {
-  let success = false;
   try {
+    let success = false;
     const user = await User.findById({ _id: req.user.id });
     success = true;
     return res.status(200).json({ success, user });
@@ -110,6 +109,7 @@ const profile = async (req, res) => {
   }
 };
 
+// Update user profile
 const update = async (req, res) => {
   // Destructuring request params
   const { name, email } = req.body;
@@ -155,10 +155,10 @@ const update = async (req, res) => {
 
 // Change Password
 const changePassword = async (req, res) => {
-  const { new_password, current_password } = req.body;
-  const userID = req.user.id;
-  let success = false;
   try {
+    const { new_password, current_password } = req.body;
+    const userID = req.user.id;
+    let success = false;
     // Validating Input
     await changePasswordSchema.validateAsync(req.body);
 
