@@ -22,7 +22,7 @@ const signup = async (req, res) => {
     await signupSchema.validateAsync(req.body);
 
     // Checking if user already exists:
-    let dbUser = await User.findOne({ email, role });
+    let dbUser = await User.findOne({ email });
     console.log(dbUser);
     // If user already exists:
     if (dbUser) {

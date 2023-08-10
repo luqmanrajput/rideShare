@@ -19,10 +19,8 @@ const request = async (req, res) => {
     // Checking ride request has already been made
     const rideCheck = await Ride.findOne({
       userId: tokenID,
-      rideStatus: "reserved",
+      $or: [{ rideStatus: "reserved" }, { rideStatus: "available" }],
     });
-    console.log("fdsfdsfsdf", rideCheck);
-    console.log(!rideCheck === 0);
     if (rideCheck) {
       return res
         .status(400)
@@ -42,7 +40,6 @@ const request = async (req, res) => {
       },
       rideStatus: "available",
     });
-    console.log(ride);
     success = true;
     return res.status(201).json({ success, message: "Ride booked!", ride });
   } catch (error) {
@@ -95,7 +92,6 @@ const history = async (req, res) => {
 const available = async (req, res) => {
   try {
     const tokenRole = req.user.role;
-    console.log("token role for available api:", tokenRole);
     if (tokenRole === "user") {
       return res
         .status(400)
@@ -111,4 +107,66 @@ const available = async (req, res) => {
   }
 };
 
-module.exports = { request, history, available };
+// Selecting Ride
+
+const select = async (req, res) => {
+  try {
+    let success = false;
+    const tokenId = req.user.id;
+    const tokenRole = req.user.role;
+    const { rideId } = req.params;
+    if (tokenRole !== "driver") {
+      return res
+        .status(400)
+        .json({ message: "Login as a driver to select a ride" });
+    }
+    const rideUpdate = {
+      rideStatus: "reserved",
+      ridedBy: tokenId,
+    };
+    const ride = await Ride.findByIdAndUpdate(
+      { _id: rideId },
+      { $set: rideUpdate },
+      { new: true }
+    );
+    if (!ride) {
+      return res.status(400).json({ success, message: "Ride Not available." });
+    }
+    success = true;
+    return res.status(200).json({ success, ride, message: "Ride selected!" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error in SELECT API" });
+  }
+};
+
+// Complete a ride
+const complete = async (req, res) => {
+  try {
+    let success = false;
+    const tokenId = req.user.id;
+    const tokenRole = req.user.role;
+    const { rideId } = req.params;
+    if (tokenRole !== "driver") {
+      return res
+        .status(400)
+        .json({ message: "Login as a driver to select a ride" });
+    }
+    const rideUpdate = {
+      rideStatus: "completed",
+    };
+    const ride = await Ride.findByIdAndUpdate(
+      { _id: rideId },
+      { $set: rideUpdate },
+      { new: true }
+    );
+    if (!ride) {
+      return res.status(400).json({ success, message: "Ride Not available." });
+    }
+    success = true;
+    return res.status(200).json({ success, ride, message: "Ride completed!" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error in SELECT API" });
+  }
+};
+
+module.exports = { request, history, available, select, complete };
